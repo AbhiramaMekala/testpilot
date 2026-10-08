@@ -1,0 +1,61 @@
+name: tests
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  ui-tests:
+    name: Project 1 — UI test automation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install playwright pytest
+      - run: playwright install --with-deps chromium
+      - name: Run the suite against saucedemo.com
+        working-directory: 1-test-automation
+        run: python -m pytest -q --junitxml=../junit.xml
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: junit-results
+          path: junit.xml
+
+  dashboard:
+    name: Project 2 — metrics dashboard
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - name: Build the dashboard from the stored builds
+        working-directory: 2-quality-dashboard
+        run: python cli.py --input sample-runs --out out --requirements requirements.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dashboard
+          path: 2-quality-dashboard/out/
+
+  generator:
+    name: Project 3 — AI test generator
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install playwright pytest
+      - run: playwright install --with-deps chromium
+      - name: Generate tests from requirements.md and run them
+        working-directory: 3-ai-test-generator
+        run: python cli.py --out out
+      - name: Triage the stored builds
+        working-directory: 3-ai-test-generator
+        run: python cli.py --triage ../2-quality-dashboard/sample-runs --out out
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: generated-tests
+          path: 3-ai-test-generator/out/

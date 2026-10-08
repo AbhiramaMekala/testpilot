@@ -1,0 +1,21 @@
+# Virtual environment — rebuilt by run.sh, never committed
+.venv/
+
+# Python cruft
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Generated output — every one of these is produced by ./run.sh
+*/out/
+report.html
+1-test-automation/screenshots/
+
+# Build results produced by running the suite. The six sample builds in
+# 2-quality-dashboard/sample-runs/build-00[1-6].xml ARE committed, because
+# projects 2 and 3 need history to read on a fresh clone.
+2-quality-dashboard/sample-runs/build-007.xml
+2-quality-dashboard/sample-runs/story-*.xml
+
+# macOS
+.DS_Store
